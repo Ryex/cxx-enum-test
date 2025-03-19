@@ -6,6 +6,7 @@ pub enum RustEnum {
     Num(i64),
     String(std::string::String),
     Bool(bool),
+    Shared(ffi::SharedData),
 }
 
 unsafe impl ::cxx::ExternType for RustEnum {
@@ -17,6 +18,7 @@ unsafe impl ::cxx::ExternType for RustEnum {
 #[cxx::bridge]
 pub mod ffi {
     
+    #[derive(Debug)]
     struct SharedData {
         size: i64,
         tags: Vec<String>,
@@ -29,8 +31,10 @@ pub mod ffi {
 
         pub fn make_enum() -> RustEnum;
         pub fn make_enum_str() -> RustEnum;
+        pub fn make_enum_shared() -> RustEnum;
         pub fn take_enum(enm: &RustEnum);
         pub fn take_mut_enum(enm: &mut RustEnum);
+
     }
 }
 

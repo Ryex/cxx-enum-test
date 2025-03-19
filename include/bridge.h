@@ -1,21 +1,24 @@
 #pragma once
 
+#include "rust/cxx.h"
 #include "cxx_enum_test/include/cxxvariant.h"
-#include <iostream>
+#include "cxx_enum_test/src/bridge.rs.h"
 
 struct RustEnum final
     : public ::rust::variant::variant<
         ::rust::variant::empty,
         int64_t,
-        ::rust::string,
-        bool
+        ::rust::String,
+        bool,
+        SharedData      
       > {
   using base =
       ::rust::variant::variant<
           ::rust::variant::empty,
           int64_t,
-          ::rust::string,
-          bool
+          ::rust::String,
+          bool,
+          SharedData
       >;
   RustEnum() = delete;
   RustEnum(const RustEnum &) = default;
@@ -32,5 +35,7 @@ template <class... Ts> struct overload : Ts... {
 
 RustEnum make_enum();
 RustEnum make_enum_str();
+RustEnum make_enum_shared();
 void take_enum(const RustEnum &enm);
 void take_mut_enum(RustEnum&);
+

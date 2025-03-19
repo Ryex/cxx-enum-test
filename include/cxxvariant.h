@@ -1,8 +1,8 @@
 #pragma once
-#include "rust/cxx.h"
 #include <cstring>
-#include <memory>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 
 // If you're using enums and variants on windows, you need to pass also
 // `/Zc:__cplusplus` as a compiler to make __cplusplus work correctly. If users
@@ -16,6 +16,7 @@
 #include <variant>
 #endif
 
+#if __cplusplus >= 201703L
 namespace rust {
 namespace variant {
 
@@ -141,7 +142,7 @@ template <typename... Ts> struct variant_base {
   variant_base(T &&other) noexcept(std::is_nothrow_constructible_v<D, T>) {
     m_Index = index_from_type_v<D>;
     new (static_cast<void *>(m_Buff)) D(std::forward<T>(other));
-  }
+  };
 
   /// @brief Participates in the resolution only if we can construct T from Args
   /// and if T is unique in Ts. Corresponds to (5) constructor of std::variant.
@@ -151,7 +152,7 @@ template <typename... Ts> struct variant_base {
   explicit variant_base(std::in_place_type_t<T> type, Args &&...args) noexcept(
       std::is_nothrow_constructible_v<T, Args...>)
       : variant_base{std::in_place_index<index_from_type_v<T>>,
-                     std::forward<Args>(args)...} {}
+                     std::forward<Args>(args)...} {};
 
   template <std::size_t I>
   using type_from_index_t = variant_alternative_t<I, Ts...>;
@@ -166,7 +167,7 @@ template <typename... Ts> struct variant_base {
       Args &&...args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
     m_Index = I;
     new (static_cast<void *>(m_Buff)) T(std::forward<Args>(args)...);
-  }
+  };
 
   template <typename... Rs>
   constexpr static bool all_same_v =
@@ -184,7 +185,7 @@ template <typename... Ts> struct variant_base {
           new (static_cast<void *>(m_Buff)) type(value);
         },
         other);
-  }
+  };
 
   constexpr static bool all_move_constructible_v =
       std::conjunction_v<std::is_move_constructible<Ts>...>;
@@ -201,11 +202,11 @@ template <typename... Ts> struct variant_base {
           new (static_cast<void *>(m_Buff)) type(std::move(value));
         },
         other);
-  }
+  };
 
-  ~variant_base() { destroy(); }
+  ~variant_base() { variant_base::destroy(); };
 
-  /// @brief Copy assignment. Staticly fails if not every type in Ts is copy
+  /// @brief Copy assignment. Statically fails if not every type in Ts is copy
   /// constructable. Corresponds to (1) assignment of std::variant.
   variant_base &operator=(const variant_base &other) {
     static_assert(
@@ -303,7 +304,7 @@ template <typename... Ts> struct variant_base {
   /// We take a similar approach to Boost/variant. Assuming that constructing or
   /// moving the new type can throw, we backup the old data, try to construct
   /// the new object in the final buffer, swap the buffers, such that the old
-  /// object is back in its original place, detroy it and move the new object
+  /// object is back in its original place, destroy it and move the new object
   /// from the old buffer back to the final place.
   ///
   /// Sources
@@ -342,7 +343,7 @@ template <typename... Ts> struct variant_base {
         std::memcpy(m_Buff, old_buff, sizeof(m_Buff));
         throw;
       }
-      // Fetch the old buffer and detroy it.
+      // Fetch the old buffer and destroy it.
       std::swap_ranges(m_Buff, m_Buff + sizeof(m_Buff), old_buff);
 
       destroy();
@@ -440,7 +441,7 @@ struct visitor_type<First, Remainder...> {
 };
 
 /// @brief Applies the visitor to the variant. Corresponds to the (3)
-/// std::visit defintion.
+/// std::visit definition.
 template <typename Visitor, typename... Ts>
 constexpr decltype(auto) visit(Visitor &&visitor,
                                variant_base<Ts...> &variant) {
@@ -448,7 +449,7 @@ constexpr decltype(auto) visit(Visitor &&visitor,
 }
 
 /// @brief Applies the visitor to the variant. Corresponds to the (4)
-/// std::visit defintion.
+/// std::visit definition.
 template <typename Visitor, typename... Ts>
 constexpr decltype(auto) visit(Visitor &&visitor,
                                const variant_base<Ts...> &variant) {
@@ -533,6 +534,6 @@ struct variant : public variant_base<Ts...>, private allow_copy<Ts...> {
 /// An empty type used for unit variants from Rust.
 struct empty {};
 
-
 } // namespace variant
 } // namespace rust
+#endif
