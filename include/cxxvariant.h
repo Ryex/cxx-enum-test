@@ -1,8 +1,8 @@
 #pragma once
+#include "rust/cxx.h"
 #include <cstring>
-#include <stdexcept>
+#include <memory>
 #include <string>
-#include <type_traits>
 
 // If you're using enums and variants on windows, you need to pass also
 // `/Zc:__cplusplus` as a compiler to make __cplusplus work correctly. If users
@@ -142,7 +142,7 @@ template <typename... Ts> struct variant_base {
   variant_base(T &&other) noexcept(std::is_nothrow_constructible_v<D, T>) {
     m_Index = index_from_type_v<D>;
     new (static_cast<void *>(m_Buff)) D(std::forward<T>(other));
-  };
+  }
 
   /// @brief Participates in the resolution only if we can construct T from Args
   /// and if T is unique in Ts. Corresponds to (5) constructor of std::variant.
@@ -152,7 +152,7 @@ template <typename... Ts> struct variant_base {
   explicit variant_base(std::in_place_type_t<T> type, Args &&...args) noexcept(
       std::is_nothrow_constructible_v<T, Args...>)
       : variant_base{std::in_place_index<index_from_type_v<T>>,
-                     std::forward<Args>(args)...} {};
+                     std::forward<Args>(args)...} {}
 
   template <std::size_t I>
   using type_from_index_t = variant_alternative_t<I, Ts...>;
@@ -167,7 +167,7 @@ template <typename... Ts> struct variant_base {
       Args &&...args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
     m_Index = I;
     new (static_cast<void *>(m_Buff)) T(std::forward<Args>(args)...);
-  };
+  }
 
   template <typename... Rs>
   constexpr static bool all_same_v =
@@ -185,7 +185,7 @@ template <typename... Ts> struct variant_base {
           new (static_cast<void *>(m_Buff)) type(value);
         },
         other);
-  };
+  }
 
   constexpr static bool all_move_constructible_v =
       std::conjunction_v<std::is_move_constructible<Ts>...>;
@@ -202,9 +202,9 @@ template <typename... Ts> struct variant_base {
           new (static_cast<void *>(m_Buff)) type(std::move(value));
         },
         other);
-  };
+  }
 
-  ~variant_base() { variant_base::destroy(); };
+  ~variant_base() { destroy(); }
 
   /// @brief Copy assignment. Statically fails if not every type in Ts is copy
   /// constructable. Corresponds to (1) assignment of std::variant.
@@ -533,6 +533,7 @@ struct variant : public variant_base<Ts...>, private allow_copy<Ts...> {
 
 /// An empty type used for unit variants from Rust.
 struct empty {};
+
 
 } // namespace variant
 } // namespace rust
