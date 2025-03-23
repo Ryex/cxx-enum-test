@@ -1,4 +1,4 @@
-#include "cxx_enum_test/include/cxxvariant.h"
+#include "cxxenum-test/include/cxxvariant.h"
 
 namespace rust {
 namespace variant {

@@ -1,5 +1,5 @@
 [package]
-name = "cxx_enum_test"
+name = "cxxenum-test"
 version = "0.1.0"
 edition = "2024"
 

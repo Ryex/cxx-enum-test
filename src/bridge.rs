@@ -25,7 +25,7 @@ pub mod ffi {
     }
 
     unsafe extern "C++" {
-        include!("cxx_enum_test/include/bridge.h");
+        include!("cxxenum-test/include/bridge.h");
 
         type RustEnum = crate::bridge::RustEnum;
 

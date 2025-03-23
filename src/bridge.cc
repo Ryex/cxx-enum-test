@@ -1,17 +1,18 @@
 
-#include "cxx_enum_test/include/bridge.h"
-#include "rust/cxx.h"
+#include "cxxenum-test/include/bridge.h"
 #include <iostream>
-RustEnum make_enum() { return RustEnum{int64_t(1502)}; }
-RustEnum make_enum_str() { return RustEnum(::rust::String("String from c++")); }
+RustEnum make_enum() { return RustEnum{RustEnum::Num(1502)}; }
+RustEnum make_enum_str() {
+  return RustEnum(RustEnum::String("String from c++"));
+}
 RustEnum make_enum_shared() {
   SharedData d;
   d.size = 4;
   d.tags = ::rust::Vec<::rust::String>({
-      ::rust::String("tag_a"),
-      ::rust::String("tag_b"),
-      ::rust::String("tag_c"),
-      ::rust::String("tag_d"),
+      RustEnum::String("tag_a"),
+      RustEnum::String("tag_b"),
+      RustEnum::String("tag_c"),
+      RustEnum::String("tag_d"),
   });
 
   return RustEnum(d);
@@ -20,13 +21,13 @@ RustEnum make_enum_shared() {
 void take_enum(const RustEnum &enm) {
   std::cout << "The index of enum is " << enm.index() << std::endl;
   const auto visitor = overload{
-      [](const ::rust::variant::empty) {
+      [](const RustEnum::Empty) {
         std::cout << "The value of enum is ::rust::empty" << std::endl;
       },
-      [](const ::rust::string &v) {
+      [](const RustEnum::String &v) {
         std::cout << "The value of enum is string '" << v << "'" << std::endl;
       },
-      [](const SharedData &d) {
+      [](const RustEnum::Shared &d) {
         std::cout << "The value of enum is SharedData struct { " << std::endl
                   << "\tsize: " << d.size << "," << std::endl
                   << "\ttags: [";
@@ -44,7 +45,7 @@ void take_enum(const RustEnum &enm) {
 
 void take_mut_enum(RustEnum &enm) {
   take_enum(enm);
-  if (!::rust::variant::holds_alternative<bool>(enm)) {
+  if (!::rust::variant::holds_alternative<RustEnum::Bool>(enm)) {
     enm = false;
   } else {
     enm = int64_t(111);
