@@ -1,36 +1,27 @@
 #pragma once
 
-#include "rust/cxx.h"
-#include "cxxenum-test/include/cxxvariant.h"
-#include "cxxenum-test/src/bridge.rs.h"
+#include <memory>
+#include <string>
 
-struct RustEnum final
-    : public ::rust::variant::variant<::rust::variant::empty, int64_t,
-                                      ::rust::String, bool, SharedData> {
-  using Empty = ::rust::variant::empty;
-  using Num = int64_t;
-  using String = ::rust::string;
-  using Bool = bool;
-  using Shared = SharedData;
-  using base = ::rust::variant::variant<::rust::variant::empty, int64_t,
-                                        ::rust::String, bool, SharedData>;
-  RustEnum() = delete;
-  RustEnum(const RustEnum &) = default;
-  RustEnum(RustEnum &&) = delete;
-  using base::base;
-  using base::operator=;
+struct SharedData;
+struct RustEnum;
+struct EnumWithRef;
 
-  using IsRelocatable = ::std::true_type;
+struct CppValue {
+  std::string value;
+  std::string const &read() const { return value; }
 };
 
-template <class... Ts> struct overload : Ts... {
-  using Ts::operator()...;
-};
-template <class... Ts> overload(Ts...) -> overload<Ts...>;
+std::unique_ptr<CppValue> make_cpp_value(const std::string &value);
 
+SharedData make_shared_data();
 RustEnum make_enum();
 RustEnum make_enum_str();
 RustEnum make_enum_shared();
+RustEnum make_enum_opaque_rust();
+RustEnum make_enum_opaque_cpp();
 void take_enum(const RustEnum &enm);
 void take_mut_enum(RustEnum &);
 
+EnumWithRef make_ref_enum();
+void take_ref_enum(const EnumWithRef &enm);
