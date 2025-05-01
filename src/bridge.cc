@@ -36,6 +36,20 @@ void take_enum(const RustEnum &enm) {
         }
         std::cout << std::endl << "\t]," << std::endl << "}" << std::endl;
       },
+      [](const RustEnum::Tuple &v) {
+        std::cout << "The value of enum is Tuple (" << v._0 << ", " << v._1
+                  << ")" << std::endl;
+      },
+      [](const RustEnum::Struct &v) {
+        std::cout << "The value of enum is Struct { \n\tval: " << v.val
+                  << ",\n\tstr: " << v.str << "\n}" << std::endl;
+      },
+      [](const RustEnum::Unit1) {
+        std::cout << "The value of enum is Unit1" << std::endl;
+      },
+      [](const RustEnum::Unit2) {
+        std::cout << "The value of enum is Unit2" << std::endl;
+      },
       [](const auto &v) {
         std::cout << "The value of enum is " << v << std::endl;
       },

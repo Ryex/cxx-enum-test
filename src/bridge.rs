@@ -1,12 +1,20 @@
 use cxx::UniquePtr;
 
 #[repr(C)]
+#[derive(Debug)]
 pub enum RustEnum {
     Empty,
     Num(i64),
-    String(std::string::String),
+    String(String),
     Bool(bool),
     Shared(ffi::SharedData),
+    Tuple(i32, i32),
+    Struct{
+        val: i32,
+        str: String
+    },
+    Unit1,
+    Unit2,
 }
 
 unsafe impl ::cxx::ExternType for RustEnum {

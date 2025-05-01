@@ -15,6 +15,17 @@ fn main() {
         tags: vec!["rust_tag_1".into(), "rust_tag_2".into()],
     });
     bridge::ffi::take_enum(&f);
+    let f = bridge::ffi::RustEnum::Tuple(42, 1377);
+    bridge::ffi::take_enum(&f);
+    let f = bridge::ffi::RustEnum::Struct {
+        val: 70,
+        str: "Also a Rust String".into(),
+    };
+    bridge::ffi::take_enum(&f);
+    let f = bridge::ffi::RustEnum::Unit1;
+    bridge::ffi::take_enum(&f);
+    let f = bridge::ffi::RustEnum::Unit2;
+    bridge::ffi::take_enum(&f);
     let mut f = bridge::ffi::make_enum();
     match &f {
         bridge::ffi::RustEnum::Empty => println!("The value is string Empty"),
@@ -22,6 +33,7 @@ fn main() {
         bridge::ffi::RustEnum::Num(n) => println!("The value is {n}"),
         bridge::ffi::RustEnum::Bool(b) => println!("The value is {b}"),
         bridge::ffi::RustEnum::Shared(d) => println!("The value is Shared Data {d:?}"),
+        _ => println!("The value is {f:?}"),
     }
     bridge::ffi::take_mut_enum(&mut f);
     match &f {
@@ -30,6 +42,7 @@ fn main() {
         bridge::ffi::RustEnum::Num(n) => println!("The value is {n}"),
         bridge::ffi::RustEnum::Bool(b) => println!("The value is {b}"),
         bridge::ffi::RustEnum::Shared(d) => println!("The value is Shared Data {d:?}"),
+        _ => println!("The value is {f:?}"),
     }
     let f = bridge::ffi::make_enum_str();
     match &f {
@@ -38,6 +51,7 @@ fn main() {
         bridge::ffi::RustEnum::Num(n) => println!("The value is {n}"),
         bridge::ffi::RustEnum::Bool(b) => println!("The value is {b}"),
         bridge::ffi::RustEnum::Shared(d) => println!("The value is Shared Data {d:?}"),
+        _ => println!("The value is {f:?}"),
     }
     let f = bridge::ffi::make_enum_shared();
     match &f {
@@ -46,5 +60,6 @@ fn main() {
         bridge::ffi::RustEnum::Num(n) => println!("The value is {n}"),
         bridge::ffi::RustEnum::Bool(b) => println!("The value is {b}"),
         bridge::ffi::RustEnum::Shared(d) => println!("The value is Shared Data {d:?}"),
+        _ => println!("The value is {f:?}"),
     }
 }
